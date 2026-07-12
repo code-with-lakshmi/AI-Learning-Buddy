@@ -1,22 +1,19 @@
 import os
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
-# Configure Gemini API
+st.set_page_config(
+    page_title="AI Learning Buddy Lakshmi",
+    page_icon="🎓"
+)
+
 api_key = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
 if not api_key:
     st.error("❌ GOOGLE_API_KEY not found")
     st.stop()
 
-genai.configure(api_key=api_key)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-st.set_page_config(
-    page_title="AI Learning Buddy Lakshmi",
-    page_icon="🎓"
-)
+client = genai.Client(api_key=api_key)
 
 st.title("🎓 AI Learning Buddy Lakshmi")
 
@@ -33,7 +30,7 @@ option = st.selectbox(
 )
 
 if st.button("Generate"):
-    if topic == "":
+    if not topic:
         st.warning("Please enter a topic.")
     else:
         if option == "Explain Concept":
@@ -47,7 +44,10 @@ if st.button("Generate"):
 
         try:
             with st.spinner("Generating..."):
-                response = model.generate_content(prompt)
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                )
 
             st.write(response.text)
 
