@@ -5,9 +5,13 @@ import google.generativeai as genai
 # Configure Gemini API
 api_key = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
+if not api_key:
+    st.error("❌ GOOGLE_API_KEY not found")
+    st.stop()
+
 genai.configure(api_key=api_key)
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 st.set_page_config(
     page_title="AI Learning Buddy Lakshmi",
@@ -41,5 +45,11 @@ if st.button("Generate"):
         else:
             prompt = topic
 
-        response = model.generate_content(prompt)
-        st.write(response.text)
+        try:
+            with st.spinner("Generating..."):
+                response = model.generate_content(prompt)
+
+            st.write(response.text)
+
+        except Exception as e:
+            st.exception(e)
